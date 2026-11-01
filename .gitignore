@@ -58,3 +58,7 @@ Thumbs.db
 *.sln
 *.sw?
 
+
+# Allow frontend Supabase library files
+!frontend/src/lib/
+!frontend/src/lib/**

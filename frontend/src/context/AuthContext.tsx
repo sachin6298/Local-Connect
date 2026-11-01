@@ -8,7 +8,11 @@ import {
   useMemo,
   type ReactNode,
 } from "react";
-import type { Session, User } from "@supabase/supabase-js";
+import type {
+  AuthChangeEvent,
+  Session,
+  User,
+} from "@supabase/supabase-js";
 import { isSupabaseConfigured, supabase } from "../lib/supabase";
 import type { UserProfile, UserRole } from "../types/auth";
 
@@ -180,7 +184,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     if (isSupabaseConfigured) {
       const { data: authListener } = supabase.auth.onAuthStateChange(
-        async (event, newSession) => {
+        async (
+          event: AuthChangeEvent,
+          newSession: Session | null
+        ) => {
           if (!mounted) return;
 
           // Ignore duplicate INITIAL_SESSION event if session matches
