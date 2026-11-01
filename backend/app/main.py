@@ -7,20 +7,39 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from app.core.config import settings
+from app.modules.items.router import router as items_router
+from app.modules.lenders.router import admin_router as admin_lenders_router
+from app.modules.lenders.router import router as lenders_router
 from app.modules.users.router import router as users_router
 
 app = FastAPI(title="LocalConnect API", version="1.0.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.frontend_origin],
+    allow_origins=[
+        settings.frontend_origin,
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:5174",
+        "http://127.0.0.1:5174",
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+    ],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type", "Idempotency-Key", "X-Razorpay-Signature"],
 )
 
-# Mount user profiles and role-specific dashboard router
+@app.on_event("startup")
+def on_startup():
+    from app.modules.items.router import seed_initial_items
+    seed_initial_items()
+
+# Mount user profiles, lenders, and items routers
 app.include_router(users_router, prefix="/api/v1")
+app.include_router(lenders_router, prefix="/api/v1")
+app.include_router(admin_lenders_router, prefix="/api/v1")
+app.include_router(items_router, prefix="/api/v1")
 
 class ChatRequest(BaseModel):
     message: str = Field(min_length=2, max_length=2500)
