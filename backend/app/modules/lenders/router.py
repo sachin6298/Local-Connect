@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from app.core.auth import AuthenticatedUser, get_current_user
+from app.core.auth import AuthenticatedUser, get_current_user, get_optional_user
 from app.core.permissions import require_admin, require_lender
 from app.modules.lenders.schemas import (
     LenderDecisionRequest,
@@ -90,7 +90,7 @@ def submit_verification_documents(
 @router.get("/{user_id}", response_model=PublicLenderProfileResponse)
 def get_public_lender_profile(
     user_id: str,
-    current_user: Optional[AuthenticatedUser] = Depends(get_current_user)
+    current_user: Optional[AuthenticatedUser] = Depends(get_optional_user)
 ):
     """
     Fetch public lender profile.
@@ -122,6 +122,18 @@ def get_public_lender_profile(
         verification_status=lender["verification_status"],
         languages=lender["languages"]
     )
+
+@admin_router.get("", response_model=List[LenderProfileResponse])
+def list_all_lenders(
+    status_filter: Optional[str] = None,
+    current_user: AuthenticatedUser = Depends(require_admin)
+):
+    """Admin endpoint to list all registered lenders and their verification statuses."""
+    results = list(_LENDERS_STORE.values())
+    if status_filter:
+        results = [l for l in results if l.get("verification_status") == status_filter]
+    return [LenderProfileResponse(**l) for l in results]
+
 
 @admin_router.post("/{lender_id}/decision", response_model=LenderProfileResponse)
 def decide_lender_verification(

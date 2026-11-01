@@ -390,7 +390,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         const updated = { ...profile, ...updates };
         setProfile(updated);
-        localStorage.setItem("localconnect_simulated_user", JSON.stringify(updated));
+        // Only persist to localStorage in simulated (non-Supabase) mode
+        if (!isSupabaseConfigured) {
+          localStorage.setItem("localconnect_simulated_user", JSON.stringify(updated));
+        }
         return { success: true, message: "Profile updated successfully." };
       } catch (err) {
         const msg = err instanceof Error ? err.message : "Failed to update profile.";

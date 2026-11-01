@@ -40,6 +40,7 @@ export default {
         "counter": "counter 2s ease-out forwards",
         "scale-in": "scaleIn 0.5s ease-out forwards",
         "shimmer": "shimmer 2s linear infinite",
+        "shake": "shake 0.5s ease-in-out",
       },
       keyframes: {
         fadeIn: { "0%": { opacity: "0" }, "100%": { opacity: "1" } },
@@ -51,6 +52,11 @@ export default {
         pulseSoft: { "0%, 100%": { opacity: "1" }, "50%": { opacity: "0.7" } },
         scaleIn: { "0%": { opacity: "0", transform: "scale(0.9)" }, "100%": { opacity: "1", transform: "scale(1)" } },
         shimmer: { "0%": { backgroundPosition: "-200% 0" }, "100%": { backgroundPosition: "200% 0" } },
+        shake: {
+          "0%, 100%": { transform: "translateX(0)" },
+          "15%, 45%, 75%": { transform: "translateX(-4px)" },
+          "30%, 60%, 90%": { transform: "translateX(4px)" },
+        },
       },
     },
   },

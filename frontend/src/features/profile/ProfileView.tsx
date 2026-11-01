@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { User, Mail, Phone, Globe, Shield, CheckCircle2, AlertCircle } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 
@@ -10,6 +10,16 @@ export function ProfileView() {
   const [language, setLanguage] = useState(profile?.preferredLanguage || "en");
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  // Sync form fields if the profile object changes (e.g. after a demo login switch)
+  useEffect(() => {
+    if (profile) {
+      setFullName(profile.fullName || "");
+      setPhone(profile.phone || "");
+      setLanguage(profile.preferredLanguage || "en");
+      setNotice(null);
+    }
+  }, [profile?.id]);
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
