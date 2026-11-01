@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
-from app.core.auth import AuthenticatedUser, get_current_user
+from app.core.auth import AuthenticatedUser, get_current_user, get_optional_user
 from app.core.permissions import require_admin, require_lender, verify_user_ownership
 from app.modules.items.schemas import (
     CategoryResponse,
@@ -333,7 +333,7 @@ def list_my_items(
 @router.get("/items/{item_id}", response_model=ItemResponse)
 def get_item_by_id(
     item_id: str,
-    current_user: Optional[AuthenticatedUser] = Depends(get_current_user),
+    current_user: Optional[AuthenticatedUser] = Depends(get_optional_user),
 ):
     """
     Fetch single item detail.
@@ -425,10 +425,7 @@ def update_rental_item(
     item = _ITEMS_STORE[item_id]
 
     # Verify ownership
-    is_owner = (
-        item["lender_id"] == current_user.id
-        or (item["lender_id"] == "demo-lender-01" and current_user.email == "sharma.lender@example.com")
-    )
+    is_owner = item["lender_id"] == current_user.id
     if not is_owner and not current_user.is_admin:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,

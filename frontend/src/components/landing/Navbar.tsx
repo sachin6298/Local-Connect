@@ -3,6 +3,7 @@ import {
   Handshake, Menu, X, Sparkles, LogIn, LogOut,
   UserCircle, LayoutDashboard, ArrowRight
 } from "lucide-react";
+import { NotificationsBell } from "../ui/NotificationsBell";
 
 interface NavbarProps {
   currentView: "explore" | "dashboard" | "profile";
@@ -146,6 +147,7 @@ export function Navbar({
 
           {profile ? (
             <div className="flex items-center gap-3 pl-2">
+              <NotificationsBell />
               <div className="text-right">
                 <span className="block text-xs font-bold text-ink leading-tight">{profile.fullName}</span>
                 <span className="inline-block rounded-full bg-brand-100 px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wide text-brand-700">
@@ -182,6 +184,7 @@ export function Navbar({
 
         {/* Mobile menu trigger */}
         <div className="flex items-center gap-2 lg:hidden">
+          {profile && <NotificationsBell />}
           <button
             onClick={onOpenChat}
             className="flex items-center gap-1 rounded-full border border-brand-200 bg-brand-50 px-2.5 py-1 text-xs font-bold text-brand-600"

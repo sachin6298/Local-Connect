@@ -103,12 +103,38 @@ def decode_and_verify_supabase_jwt(token: str, secret: Optional[str] = None) -> 
 
     return payload
 
-def get_current_user(authorization: Optional[str] = Header(None)) -> AuthenticatedUser:
+def get_current_user(
+    authorization: Optional[str] = Header(None),
+    x_demo_user_id: Optional[str] = Header(None, alias="X-Demo-User-Id"),
+    x_demo_role: Optional[str] = Header(None, alias="X-Demo-Role"),
+    x_demo_name: Optional[str] = Header(None, alias="X-Demo-Name"),
+) -> AuthenticatedUser:
     """
     FastAPI dependency to extract and verify the current authenticated user from Authorization header.
-    Never trusts client-supplied user IDs or roles.
+    Never trusts client-supplied user IDs or roles in production.
+    In development mode with simulated users, accepts X-Demo headers if Authorization is absent.
     """
+    demo_id = x_demo_user_id if isinstance(x_demo_user_id, str) else None
+    demo_role = x_demo_role if isinstance(x_demo_role, str) else None
+    demo_name = x_demo_name if isinstance(x_demo_name, str) else None
+
     if not authorization:
+        # Development / demo environment fallback
+        if settings.app_env != "production" and demo_id:
+            role = demo_role if demo_role in ("tourist", "lender", "admin") else (
+                "lender" if "lender" in demo_id
+                else "admin" if "admin" in demo_id
+                else "tourist"
+            )
+            name = demo_name or ("Radhe Mohan Sharma" if role == "lender" else "Operator Admin" if role == "admin" else "Ramesh Kumar")
+            return AuthenticatedUser(
+                id=demo_id,
+                email=f"{demo_id}@localconnect.app",
+                role=role,
+                full_name=name,
+                is_authenticated=True,
+            )
+
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Authorization header missing. Please authenticate.",
@@ -157,6 +183,20 @@ def get_current_user(authorization: Optional[str] = Header(None)) -> Authenticat
         full_name=full_name,
         is_authenticated=True,
     )
+
+
+def get_optional_user(authorization: Optional[str] = Header(None)) -> Optional[AuthenticatedUser]:
+    """
+    FastAPI dependency that returns the authenticated user if a valid token is provided,
+    or None if no Authorization header is present. Raises 401 only for malformed/invalid tokens.
+    """
+    if not authorization:
+        return None
+    try:
+        return get_current_user(authorization)
+    except HTTPException as exc:
+        # Malformed or expired token on an optional endpoint → still reject
+        raise exc
 
 def create_test_jwt(
     user_id: str,

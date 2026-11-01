@@ -38,6 +38,7 @@ import { FaqSection } from "./components/landing/FaqSection";
 import { FinalCta } from "./components/landing/FinalCta";
 import { Footer } from "./components/landing/Footer";
 import { PriceEditModal, type EditablePriceItem } from "./components/pricing/PriceEditModal";
+import { RequestModal } from "./features/tourist/RequestModal";
 
 const API = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
@@ -475,94 +476,13 @@ function MainContent() {
         </div>
       )}
 
-      {/* Rental Request Dialog */}
-      {selected && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm animate-fade-in"
-          onClick={() => setSelected(null)}
-        >
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-label="Rental request"
-            onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl transition-all sm:p-7"
-          >
-            <div className="flex items-start justify-between border-b border-slate-100 pb-4">
-              <div>
-                <span className="eyebrow">RENTAL CONFIRMATION</span>
-                <h3 className="mt-1 text-xl font-black text-ink">Request this item</h3>
-              </div>
-              <button
-                onClick={() => setSelected(null)}
-                aria-label="Close dialog"
-                className="rounded-full p-1.5 text-slate-400 hover:bg-slate-100 hover:text-ink"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            <div className="mt-5 flex gap-4">
-              <img
-                src={selected.image}
-                alt=""
-                className="h-24 w-28 rounded-2xl object-cover border border-slate-200"
-              />
-              <div>
-                <p className="font-black text-sm text-ink">{selected.title}</p>
-                <p className="mt-1 text-xs text-slate-500 flex items-center gap-1">
-                  <MapPin size={12} /> {selected.locality}
-                </p>
-                <p className="mt-2 text-base font-black text-brand-600">
-                  {selected.rate}{" "}
-                  <span className="text-xs font-medium text-slate-400">/{selected.unit}</span>
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-5 grid gap-3 sm:grid-cols-2">
-              <label className="text-xs font-bold text-slate-700">
-                Rental Start Date
-                <input
-                  type="date"
-                  className="mt-1 block w-full rounded-xl border border-slate-200 p-2.5 text-xs outline-none focus:border-brand-500"
-                />
-              </label>
-              <label className="text-xs font-bold text-slate-700">
-                Rental Return Date
-                <input
-                  type="date"
-                  className="mt-1 block w-full rounded-xl border border-slate-200 p-2.5 text-xs outline-none focus:border-brand-500"
-                />
-              </label>
-            </div>
-
-            <label className="mt-3 block text-xs font-bold text-slate-700">
-              Quantity
-              <input
-                type="number"
-                min="1"
-                defaultValue="1"
-                className="mt-1 block w-full rounded-xl border border-slate-200 p-2.5 text-xs outline-none focus:border-brand-500"
-              />
-            </label>
-
-            <div className="mt-4 rounded-2xl bg-brand-50/70 p-3.5 text-xs leading-relaxed text-brand-900 border border-brand-100">
-              Requesting as <span className="font-bold">{profile?.fullName}</span>. After the host family accepts, you can complete payment and receive the public handover pin.
-            </div>
-
-            <button
-              onClick={() => {
-                setSelected(null);
-                setNotice("Rental request submitted successfully! Awaiting host confirmation.");
-              }}
-              className="mt-5 w-full rounded-xl bg-brand-600 py-3.5 text-xs font-bold text-white shadow-md shadow-brand-500/25 transition hover:bg-brand-700"
-            >
-              Confirm Rental Request
-            </button>
-          </div>
-        </div>
-      )}
+      {/* Real Rental Request Modal */}
+      <RequestModal
+        item={selected}
+        isOpen={Boolean(selected)}
+        onClose={() => setSelected(null)}
+        onSuccess={(msg) => setNotice(msg)}
+      />
 
       {/* AI Chatbot Drawer */}
       {chatOpen && (
